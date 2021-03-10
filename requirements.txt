@@ -1,0 +1,8 @@
+# Web framework
+Flask
+
+# Database management
+flask-migrate
+flask-script
+psycopg2-binary
+sqlalchemy

@@ -1,0 +1,19 @@
+# Code quality check
+bandit
+pydocstyle
+flake8
+flake8-quotes
+pylint
+pylint-flask
+pylint-flask-sqlalchemy
+coverage
+
+# Testing framework
+pytest
+pytest-flask
+
+# Environment
+python-dotenv
+
+# Other necessary requirements
+-r requirements.txt

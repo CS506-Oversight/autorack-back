@@ -3,19 +3,35 @@ import os
 import sys
 from typing import TypeVar
 
-from dotenv import load_dotenv
 from flask import Flask, Response
 
 from .data import db, migrate
+
 from .response import ResponseBase
 from .routes import blueprint_main
 
 __all__ = ("create_app",)
 
-# Load environment variables defined in `.env`
-load_dotenv()
-
 T = TypeVar("T", bound=ResponseBase)
+
+
+def try_load_dotenv():
+    try:
+        # Optional import
+        # noinspection PyPackageRequirements
+        from dotenv import load_dotenv
+
+        load_dotenv()
+    except ImportError:
+        if os.path.exists(".env"):
+            print(
+                "`.env` file detected. However, `python-dotenv` is not installed. "
+                "Run `pip install python-dotenv` to install the package."
+            )
+
+
+# Load environment variables defined in `.env`
+try_load_dotenv()
 
 
 class App(Flask):

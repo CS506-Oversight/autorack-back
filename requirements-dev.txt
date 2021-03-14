@@ -12,8 +12,5 @@ coverage
 pytest
 pytest-flask
 
-# Environment
-python-dotenv
-
 # Other necessary requirements
 -r requirements.txt

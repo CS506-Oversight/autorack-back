@@ -4,9 +4,9 @@ import sys
 from typing import TypeVar
 
 from flask import Flask, Response
+from flask_cors import CORS
 
 from .data import db, migrate
-
 from .response import ResponseBase
 from .routes import blueprint_main
 
@@ -54,6 +54,9 @@ class App(Flask):
 def create_app() -> Flask:
     """Creates a Flask app and return it."""
     app: Flask = App(__name__)
+
+    # Enable CORS
+    CORS(app)
 
     # Connect & Migrate database
     # TODO: pylint disable statement to-be-removed after fix:

@@ -1,5 +1,6 @@
 # Web framework
 Flask
+flask-cors
 
 # Database management
 flask-migrate

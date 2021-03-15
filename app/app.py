@@ -70,6 +70,8 @@ def create_app() -> Flask:
         sys.exit(1)
 
     app.config["SQLALCHEMY_DATABASE_URI"] = sql_alchemy_uri
+    # https://stackoverflow.com/a/33790196/11571888
+    app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
     db.init_app(app)
     migrate.init_app(app, db)
 

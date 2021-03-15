@@ -11,6 +11,7 @@ coverage
 # Testing framework
 pytest
 pytest-flask
+pytest-postgresql
 
 # Other necessary requirements
 -r requirements.txt

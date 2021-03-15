@@ -16,10 +16,11 @@ T = TypeVar("T", bound=ResponseBase)
 
 
 def try_load_dotenv():
+    """Attempt to load the environment variables from ``.env`` via ``dotenv``, if installed."""
     try:
         # Optional import
         # noinspection PyPackageRequirements
-        from dotenv import load_dotenv
+        from dotenv import load_dotenv  # pylint: disable=import-outside-toplevel
 
         load_dotenv()
     except ImportError:

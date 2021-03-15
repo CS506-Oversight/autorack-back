@@ -7,6 +7,13 @@ env:
   FLASK_ENV: production
   FIREBASE_ACCOUNT_KEY: ${{ secrets.FIREBASE_ACCOUNT_KEY }}
 
+  PSQL_VERSION: '13.2'
+  PSQL_TEST_DB: 'testdb'
+  PSQL_TEST_USER: 'test'
+  PSQL_TEST_PASSWORD: 'test'
+
+  SQLALCHEMY_DATABASE_URI: 'postgresql://test:test@localhost:5432/testdb'
+
 jobs:
   quality-check:
     name: Code Quality Check
@@ -14,6 +21,13 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
+      - uses: harmon758/postgresql-action@v1
+        with:
+          postgresql version: ${{ env.PSQL_VERSION }}
+          postgresql db: ${{ env.PSQL_TEST_DB }}
+          postgresql user: ${{ env.PSQL_TEST_USER }}
+          postgresql password: ${{ env.PSQL_TEST_PASSWORD }}
+
       - name: Checkout repository
         uses: actions/checkout@v2
 
@@ -24,33 +38,9 @@ jobs:
         run: |
           pip install -r requirements-dev.txt
 
-      - name: pydocstyle checks (`app`)
+      - name: Setup database
         run: |
-          pydocstyle app --count
-
-      - name: pylint checks (`app`)
-        run: |
-          pylint app
-
-  quality-check-win-mac:
-    name: Code Quality Check (Win & Mac)
-
-    strategy:
-      matrix:
-        os: [ macos-latest, windows-latest ]
-
-    runs-on: ${{ matrix.os }}
-
-    steps:
-      - name: Checkout repository
-        uses: actions/checkout@v2
-
-      - name: Setup Python
-        uses: actions/setup-python@v2
-
-      - name: Install required packages
-        run: |
-          pip install -r requirements-dev.txt
+          flask db upgrade
 
       - name: pydocstyle checks (`app`)
         run: |
@@ -66,6 +56,13 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
+      - uses: harmon758/postgresql-action@v1
+        with:
+          postgresql version: ${{ env.PSQL_VERSION }}
+          postgresql db: ${{ env.PSQL_TEST_DB }}
+          postgresql user: ${{ env.PSQL_TEST_USER }}
+          postgresql password: ${{ env.PSQL_TEST_PASSWORD }}
+
       - name: Checkout repository
         uses: actions/checkout@v2
 
@@ -75,6 +72,10 @@ jobs:
       - name: Install required packages
         run: |
           pip install -r requirements-dev.txt
+
+      - name: Setup database
+        run: |
+          flask db upgrade
 
       - name: bandit checks (`app`)
         run: |
@@ -86,6 +87,13 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
+      - uses: harmon758/postgresql-action@v1
+        with:
+          postgresql version: ${{ env.PSQL_VERSION }}
+          postgresql db: ${{ env.PSQL_TEST_DB }}
+          postgresql user: ${{ env.PSQL_TEST_USER }}
+          postgresql password: ${{ env.PSQL_TEST_PASSWORD }}
+
       - name: Checkout repository
         uses: actions/checkout@v2
 
@@ -96,29 +104,9 @@ jobs:
         run: |
           pip install -r requirements-dev.txt
 
-      - name: Run tests
+      - name: Setup database
         run: |
-          pytest --all
-
-  tests-win-mac:
-    name: Tests (Win & Mac)
-
-    strategy:
-      matrix:
-        os: [ macos-latest, windows-latest ]
-
-    runs-on: ${{ matrix.os }}
-
-    steps:
-      - name: Checkout repository
-        uses: actions/checkout@v2
-
-      - name: Setup Python
-        uses: actions/setup-python@v2
-
-      - name: Install required dev packages
-        run: |
-          pip install -r requirements-dev.txt
+          flask db upgrade
 
       - name: Run tests
         run: |
@@ -129,7 +117,16 @@ jobs:
 
     runs-on: ubuntu-latest
 
+    needs: [ tests ]
+
     steps:
+      - uses: harmon758/postgresql-action@v1
+        with:
+          postgresql version: ${{ env.PSQL_VERSION }}
+          postgresql db: ${{ env.PSQL_TEST_DB }}
+          postgresql user: ${{ env.PSQL_TEST_USER }}
+          postgresql password: ${{ env.PSQL_TEST_PASSWORD }}
+
       - name: Checkout repository
         uses: actions/checkout@v2
 
@@ -139,6 +136,10 @@ jobs:
       - name: Install required dev packages
         run: |
           pip install -r requirements-dev.txt
+
+      - name: Setup database
+        run: |
+          flask db upgrade
 
       - name: Generate Coverage database
         run: |

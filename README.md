@@ -60,16 +60,18 @@ CI-specific behavior will **not** be enabled if this is not set to `1`.
 
 1. Run `pip -r requirements.txt` for installing all required dependencies.
 
-   - If the app is cloned for development, run `pip -r requirements-dev.txt` instead.
+    - If the app is cloned for development, run `pip -r requirements-dev.txt` instead.
 
-   - `requirements-dev.txt` contains additional dependencies for development only.
+    - `requirements-dev.txt` contains additional dependencies for development only.
 
 2. Set the environment variables for `FLASK_APP` to `run.py`; `FLASK_ENV` to the intended value.
 
-   - For `FLASK_ENV`, set it to `development` if the code is cloned for development.
-     Doing so will enable Flask debug mode, which will hot-reload the code.
+    - For `FLASK_ENV`, set it to `development` if the code is cloned for development. Doing so will enable Flask debug
+      mode, which will hot-reload the code.
 
-3. `flask run` to start the app.
+3. `flask db upgrade` & `flask db migrate` to update the database.
+
+4. `flask run` to start the app.
 
 ### Start the app via Python
 

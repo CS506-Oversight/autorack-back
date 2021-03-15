@@ -1,6 +1,8 @@
 import pytest
 
 from app import create_app
+from app.data import db
+from app.data.base import Controller
 
 
 # region `pytest` fixtures
@@ -38,4 +40,20 @@ def pytest_configure(config):
             marks.append('not holistic')
 
         setattr(config.option, 'markexpr', (getattr(config.option, 'markexpr', "") + ' and '.join(marks)).strip())
+
+
+# endregion
+
+
+# region Global setup / teardown
+@pytest.fixture(scope="function", autouse=True)
+def manage_postgresql_database(client):
+    # Execute the test itself
+    yield
+
+    # Clear all data
+    session = db.session
+    for ctrl_class in Controller.__subclasses__():
+        ctrl_class.get_query().delete()
+    session.commit()
 # endregion

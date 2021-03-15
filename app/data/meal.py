@@ -45,8 +45,6 @@ class MealController(Controller):
 
         model = MealModel(name=name)
 
-        _: list[bool] = []
-
         session.add(model)
         session.commit()
 

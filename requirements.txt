@@ -1,3 +1,6 @@
+# Deployment
+gunicorn
+
 # Web framework
 Flask
 flask-cors

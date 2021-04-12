@@ -8,7 +8,7 @@ from flask_cors import CORS
 
 from .data import db, migrate
 from .response import ResponseBase
-from .routes import blueprint_main
+from .routes import blueprint_main, blueprint_user, blueprint_menu
 
 __all__ = ("create_app",)
 
@@ -78,5 +78,7 @@ def create_app() -> Flask:
 
     # Register routes
     app.register_blueprint(blueprint_main)
+    app.register_blueprint(blueprint_user)
+    app.register_blueprint(blueprint_menu)
 
     return app

@@ -47,9 +47,10 @@ class UserController(Controller):
         If ``email`` already exists
         this directly returns ``False`` without performing any additional actions.
         """
-        exists = cls.get_query().filter_by(email=email).first() is not None
+        email_check = cls.get_query().filter_by(email=email).first() is not None
+        user_id_check = cls.get_query().filter_by(user_id=user_id).first() is not None
         
-        if exists:
+        if email_check or user_id_check:
             return False
 
         session: Session = cls.get_session()
@@ -68,19 +69,36 @@ class UserController(Controller):
         return True
 
     @classmethod
-    def get_user(cls, email: str) -> UserModel:
-        """Get the user with ``email``."""
-        # [!] model member `query` is generated automatically, therefore auto-complete is unavailable.
-        # - Reference: https://stackoverflow.com/a/39103583/11571888
-        return cls.get_query().filter_by(email=email).first()
+    def get_user(cls, user_id: str) -> UserModel:
+        """Gets the user with ``user_id``."""
+        return cls.get_query().filter_by(user_id=user_id).first()
 
-    # @classmethod
-    # def delete_user(cls, email: str) -> UserModel:
-    #     """Delete the user with ``email``."""
-    #     return cls.get_query().filter_by(email=email).first()
+    @classmethod
+    def delete_user(cls, user_id: str) -> UserModel:
+        """
+        Deletes the user with ``user_id``.
 
-    # @classmethod
-    # def update_user(cls, email: str) -> UserModel:
-    #     """Update the user with ``email``."""
-    #     return cls.get_query().filter_by(email=email).first()
+        TODO: Before deleting a user, there must be extensive checks
+        (e.g. are there still any pending restock purchases, etc.).
+
+        A user's restock purchases preferences should automatically
+        be set to manual to ensure that no other purchases are made at
+        the end of the day.
+        """
+        user = cls.get_user(user_id=user_id)
+
+        if not user:
+            return user
+
+        session: Session = cls.get_session()
+
+        session.delete(user)
+        session.commit()
+
+        return user
+
+    @classmethod
+    def update_user(cls, user_id: str) -> UserModel:
+        """Updates the user with ``user_id``."""
+        pass
 

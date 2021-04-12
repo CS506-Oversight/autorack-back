@@ -51,7 +51,7 @@ class RestockPurchaseController(Controller):
         """
         session: Session = cls.get_session()
 
-        model = RestockPurchaseModel(
+        purchase = RestockPurchaseModel(
             purchase_id=purchase_id,
             status=status,
             total_price=total_price,
@@ -61,12 +61,12 @@ class RestockPurchaseController(Controller):
             user_id=user_id
         )
 
-        session.add(model)
+        session.add(purchase)
         session.commit()
 
         return True
 
     @classmethod
     def get_restock_purchases(cls, user_id: str) -> RestockPurchaseModel:
-        """Get the purchase with ``user_id``."""
-        return cls.get_query().filter_by(user_id=user_id)
+        """Gets the restock purchases for user with ``user_id``."""
+        return cls.get_query().filter_by(user_id=user_id).all()

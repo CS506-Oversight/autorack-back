@@ -99,6 +99,6 @@ class UserController(Controller):
 
     @classmethod
     def update_user(cls, user_id: str) -> UserModel:
-        """Updates the user with ``user_id``."""
+        """TODO: Update the user with ``user_id``."""
         pass
 

@@ -1,4 +1,6 @@
 """Data model and controller for menu."""
+import json
+
 from sqlalchemy.orm import Session
 from sqlalchemy import and_
 
@@ -43,13 +45,17 @@ class MenuController(Controller):
         Add a menu item and return true or false when the item is added.
         """
         # TODO: SEE IF THERE SHOULD BE SOME CHECK TO SEE HOW MANY WERE ADDED OUT OF ALL SENT
+        # TODO: MAY NEED TO ADD ROLLBACKS HERE JUST IN CASE
+
         session: Session = cls.get_session()
 
         for item in payload:
+            ingredients_to_str = json.dumps(item["ingredients"])
+
             menu_item = MenuModel(
                 menu_item_id=item["menu_item_id"],
                 description=item["description"],
-                ingredients=item["ingredients"],
+                ingredients=ingredients_to_str,
                 user_id=user_id,
             )
 
@@ -62,7 +68,23 @@ class MenuController(Controller):
     @classmethod
     def get_menu(cls, user_id: str) -> list:
         """Gets the entire menu for user with ``user_id``."""
-        return cls.get_query().filter_by(user_id=user_id).all()
+        menu = []
+        query_data = cls.get_query().filter_by(user_id=user_id).all()
+
+        for data in query_data:
+            # Deserialize the JSON string into JSON Python object
+            ingredients = json.loads(data.ingredients)
+
+            # Only return data with the following attributes
+            menu_item = {
+                "menu_item_id": data.menu_item_id,
+                "description": data.description,
+                "ingredients": ingredients
+            }
+
+            menu.append(menu_item)
+
+        return menu
 
     @classmethod
     def get_menu_item(cls, menu_item_id: str, user_id: str) -> MenuModel:
@@ -76,10 +98,10 @@ class MenuController(Controller):
 
     @classmethod
     def update_menu_item(cls, menu_item_id: str, user_id: str) -> MenuModel:
-        """Updates the menu item with ``menu_item_id`` for user with ``user_id``."""
+        """TODO: Update the menu item with ``menu_item_id`` for user with ``user_id``."""
         pass
 
     @classmethod
     def delete_menu_item(cls, menu_item_id: str, user_id: str) -> MenuModel:
-        """Deletes the menu item with ``menu_item_id`` for user with ``user_id``.."""
+        """TODO: Delete the menu item with ``menu_item_id`` for user with ``user_id``.."""
         pass

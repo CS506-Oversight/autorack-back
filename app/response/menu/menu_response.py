@@ -8,9 +8,7 @@ from app.data import MenuModel
 from app.response.keys import KEY_DATA
 from app.response.mixin import MessagedResponseMixin, StatusedResponseMixin, HttpOkResponseMixin
 
-__all__ = ("MenuItemResponse", "MenuResponse")
-
-# TODO: ADDED RESPONSE CLASSES TO HANDLE CHANGES IN ROUTES
+__all__ = ("MenuItemResponse", "MenuResponse", "AddMenuItemResponse")
 
 
 @dataclass
@@ -23,7 +21,7 @@ class MenuItemResponse(MessagedResponseMixin, StatusedResponseMixin, HttpOkRespo
     @property
     def response_message(self) -> str:
         # [!] Does not handle the case where `menu_item` is `None`
-        # because our type-hinting indicates that there *must* be a model for `meal`
+        # because our type-hinting indicates that there *must* be a model for `menu_item`
         return f"Menu item {self.operation}. (Menu item: {self.menu_item.menu_item_id})"
 
     @property
@@ -31,12 +29,13 @@ class MenuItemResponse(MessagedResponseMixin, StatusedResponseMixin, HttpOkRespo
         return True
 
     def to_json(self) -> dict[str, Any]:
-        # TODO: FIND CORRECT WAY TO SEND THIS DATA BACK
-        data = json.dumps({
-                'menu_item_id': self.menu_item.menu_item_id,
-                'ingredients': self.menu_item.ingredients,
-                'description': self.menu_item.description,
-        })
+        ingredients = json.loads(self.menu_item.ingredients)
+
+        data = {
+            "menu_item_id": self.menu_item.menu_item_id,
+            "description": self.menu_item.description,
+            "ingredients": ingredients,
+        }
 
         return super().to_json() | {
             KEY_DATA: data
@@ -44,26 +43,43 @@ class MenuItemResponse(MessagedResponseMixin, StatusedResponseMixin, HttpOkRespo
 
 
 @dataclass
-class MenuResponse(MessagedResponseMixin, StatusedResponseMixin, HttpOkResponseMixin):
-    """Response class for menu."""
+class AddMenuItemResponse(MessagedResponseMixin, StatusedResponseMixin, HttpOkResponseMixin):
+    """Response class for menu items."""
 
-    menu: MenuModel
+    user_id: str
+    num_items: int
     operation: str
 
     @property
     def response_message(self) -> str:
         # [!] Does not handle the case where `menu_item` is `None`
         # because our type-hinting indicates that there *must* be a model for `meal`
-        return f"Menu {self.operation}. (User: {self.menu.user_id})"
+        return f"User {self.operation} {self.num_items} menu items. (User: {self.user_id})"
+
+    @property
+    def response_ok(self) -> bool:
+        return True
+
+
+@dataclass
+class MenuResponse(MessagedResponseMixin, StatusedResponseMixin, HttpOkResponseMixin):
+    """Response class for menu."""
+
+    menu: list
+    operation: str
+    user_id: str
+
+    @property
+    def response_message(self) -> str:
+        # [!] Does not handle the case where `menu_item` is `None`
+        # because our type-hinting indicates that there *must* be a model for `meal`
+        return f"Menu {self.operation}. (User: {self.user_id})"
 
     @property
     def response_ok(self) -> bool:
         return True
 
     def to_json(self) -> dict[str, Any]:
-        # TODO: FIND CORRECT WAY TO SEND THIS DATA BACK
-        data = 'MENU DATA'
-
         return super().to_json() | {
-            KEY_DATA: data
+            KEY_DATA: self.menu
         }

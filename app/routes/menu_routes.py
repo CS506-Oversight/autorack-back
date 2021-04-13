@@ -3,7 +3,7 @@ import json
 from flask import Blueprint, request
 
 from .operations import *
-from app.response import MenuItemResponse, MenuResponse, MenuControlFailedResponse
+from app.response import MenuItemResponse, MenuResponse, MenuControlFailedResponse, AddMenuItemResponse
 from app.data import MenuController
 
 from .path import EP_MENU, EP_MENU_ITEM
@@ -64,12 +64,10 @@ def handle_get_menu_item(user_id: str, menu_item_id: str, operation: str):
 def handle_get_menu(user_id: str, operation: str):
     menu = MenuController.get_menu(user_id=user_id)
 
-    # TODO: FIX THIS METHOD SINCE MENU SHOULD BE A LIST OF MENU ITEMS
-
     if not menu:
         return MenuControlFailedResponse(message=f"Failed to get menu for user with user_id: {user_id}")
 
-    return MenuResponse(menu=menu, operation=operation)
+    return MenuResponse(menu=menu, user_id=user_id, operation=operation)
 
 
 def handle_add_menu_item(payload: list, user_id: str, operation: str):
@@ -79,17 +77,16 @@ def handle_add_menu_item(payload: list, user_id: str, operation: str):
     )
 
     if not new_menu_item:
-        return MenuControlFailedResponse(message=f"Failed to add menu item(s) with user with user_id: {user_id}")
+        return MenuControlFailedResponse(message=f"Failed to add menu item(s) for user with user_id: {user_id}")
 
-    # TODO: WHEN SUCCESSFULLY ADDING NEW ITEMS, INSTEAD OF SENDING BACK A MENU ITEM, SEND THE NUMBER OF ITEMS ADDED
-    menu_item = MenuController.get_menu_item(menu_item_id="xsmnfowrepokgp", user_id=user_id)
-
-    return MenuItemResponse(menu_item=menu_item, operation=operation)
+    return AddMenuItemResponse(user_id=user_id, num_items=len(payload), operation=operation)
 
 
 def handle_delete_menu_item(user_id: str, menu_item_id: str, operation: str):
+    # TODO: IMPLEMENT DELETE ROUTE FOR MENU ITEMS
     pass
 
 
 def handle_update_menu_item(user_id: str, menu_item_id: str, operation: str):
+    # TODO: IMPLEMENT UPDATE ROUTE FOR MENU ITEMS
     pass

@@ -1,5 +1,6 @@
 """Data model and controller for menu."""
 import json
+from typing import Optional
 
 from sqlalchemy.orm import Session
 from sqlalchemy import and_
@@ -40,26 +41,37 @@ class MenuController(Controller):
     model = MenuModel
 
     @classmethod
-    def add_menu_items(cls, user_id: str, payload: list) -> bool:
+    def upsert_menu_items(cls, user_id: str, payload: list) -> bool:
         """
         Add a menu item and return true or false when the item is added.
         """
-        # TODO: SEE IF THERE SHOULD BE SOME CHECK TO SEE HOW MANY WERE ADDED OUT OF ALL SENT
         # TODO: MAY NEED TO ADD ROLLBACKS HERE JUST IN CASE
 
         session: Session = cls.get_session()
 
         for item in payload:
             ingredients_to_str = json.dumps(item["ingredients"])
+            menu_item_id = item["menu_item_id"]
 
-            menu_item = MenuModel(
-                menu_item_id=item["menu_item_id"],
-                description=item["description"],
-                ingredients=ingredients_to_str,
-                user_id=user_id,
-            )
+            menu_item = cls.__item_exists(user_id=user_id, menu_item_id=menu_item_id)
 
-            session.add(menu_item)
+            if menu_item:
+                cls.__update(
+                    menu_item_id=menu_item.menu_item_id,
+                    user_id=menu_item.user_id,
+                    new_desc=item["description"],
+                    new_ingredients=ingredients_to_str,
+                    session=session
+                )
+            else:
+                menu_item = MenuModel(
+                    menu_item_id=menu_item_id,
+                    description=item["description"],
+                    ingredients=ingredients_to_str,
+                    user_id=user_id,
+                )
+
+                session.add(menu_item)
 
         session.commit()
 
@@ -86,9 +98,13 @@ class MenuController(Controller):
 
         return menu
 
+    # @classmethod
+    # def delete_menu_item(cls, menu_item_id: str, user_id: str) -> MenuModel:
+    #     """TODO: Delete the menu item with ``menu_item_id`` for user with ``user_id``.."""
+    #     pass
+
     @classmethod
-    def get_menu_item(cls, menu_item_id: str, user_id: str) -> MenuModel:
-        """Gets the menu item with ``menu_item_id`` for user with ``user_id``."""
+    def __item_exists(cls, user_id: str, menu_item_id: str) -> Optional[MenuModel]:
         return cls.get_query().filter(
             and_(
                 MenuModel.menu_item_id == menu_item_id,
@@ -97,11 +113,17 @@ class MenuController(Controller):
         ).first()
 
     @classmethod
-    def update_menu_item(cls, menu_item_id: str, user_id: str) -> MenuModel:
-        """TODO: Update the menu item with ``menu_item_id`` for user with ``user_id``."""
-        pass
+    def __update(cls, menu_item_id: str, user_id: str, new_desc: str, new_ingredients: str, session: Session) -> None:
+        session.query(MenuModel).filter(
+            and_(
+                MenuModel.user_id == user_id,
+                MenuModel.menu_item_id == menu_item_id
+            )
+        ).update(
+            {
+                "description": new_desc,
+                "ingredients": new_ingredients
+            }
+        )
 
-    @classmethod
-    def delete_menu_item(cls, menu_item_id: str, user_id: str) -> MenuModel:
-        """TODO: Delete the menu item with ``menu_item_id`` for user with ``user_id``.."""
-        pass
+        session.commit()

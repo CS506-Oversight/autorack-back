@@ -8,7 +8,7 @@ from app.data import MenuModel
 from app.response.keys import KEY_DATA
 from app.response.mixin import MessagedResponseMixin, StatusedResponseMixin, HttpOkResponseMixin
 
-__all__ = ("MenuItemResponse", "MenuResponse", "AddMenuItemResponse")
+__all__ = ("MenuItemResponse", "MenuResponse", "UpsertMenuItemResponse")
 
 
 @dataclass
@@ -43,7 +43,7 @@ class MenuItemResponse(MessagedResponseMixin, StatusedResponseMixin, HttpOkRespo
 
 
 @dataclass
-class AddMenuItemResponse(MessagedResponseMixin, StatusedResponseMixin, HttpOkResponseMixin):
+class UpsertMenuItemResponse(MessagedResponseMixin, StatusedResponseMixin, HttpOkResponseMixin):
     """Response class for menu items."""
 
     user_id: str

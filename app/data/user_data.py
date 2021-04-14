@@ -1,5 +1,6 @@
 """Data model and controller for users."""
 import datetime
+from typing import Optional
 
 from sqlalchemy.orm import Session
 
@@ -44,7 +45,7 @@ class UserController(Controller):
         """
         Add a user and return if the user is added or not.
 
-        If ``email`` already exists
+        If ``email`` or ``user_id`` already exists
         this directly returns ``False`` without performing any additional actions.
         """
         email_check = cls.get_query().filter_by(email=email).first() is not None
@@ -74,31 +75,6 @@ class UserController(Controller):
         return cls.get_query().filter_by(user_id=user_id).first()
 
     @classmethod
-    def delete_user(cls, user_id: str) -> UserModel:
-        """
-        Deletes the user with ``user_id``.
-
-        TODO: Before deleting a user, there must be extensive checks
-        (e.g. are there still any pending restock purchases, etc.).
-
-        A user's restock purchases preferences should automatically
-        be set to manual to ensure that no other purchases are made at
-        the end of the day.
-        """
-        user = cls.get_user(user_id=user_id)
-
-        if not user:
-            return user
-
-        session: Session = cls.get_session()
-
-        session.delete(user)
-        session.commit()
-
-        return user
-
-    @classmethod
     def update_user(cls, user_id: str) -> UserModel:
         """TODO: Update the user with ``user_id``."""
         pass
-

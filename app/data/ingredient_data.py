@@ -65,11 +65,6 @@ class IngredientController(Controller):
         pass
 
     @classmethod
-    def get_ingredients(cls, user_id: str) -> IngredientModel:
-        """Gets all the ingredients for user with ``user_id``."""
-        pass
-
-    @classmethod
     def update_ingredient(cls, ingredient_id: str, user_id: str) -> IngredientModel:
         """Updates the ingredient with ``ingredient_id`` for user with ``user_id``."""
         pass

@@ -1,5 +1,7 @@
 """Data model and controller for restock purchases."""
 import datetime
+import json
+
 from sqlalchemy.orm import Session
 
 from .base import Controller
@@ -18,9 +20,11 @@ class RestockPurchaseModel(db.Model):
 
     purchase_id = db.Column(db.String(), primary_key=True)
     status = db.Column(db.String(), nullable=False)
+    # Should be stored in pennies for precision
     total_price = db.Column(db.Integer(), nullable=False)
     purchase_date = db.Column(db.DateTime(), nullable=False)
     purchase_type = db.Column(db.String(), nullable=False)
+    # Should be saved as a serialized JSON object
     items_purchased = db.Column(db.String(), nullable=False)
     user_id = db.Column(db.String(), nullable=False)
 
@@ -37,6 +41,19 @@ class RestockPurchaseModel(db.Model):
     def __repr__(self):
         return f"<Purchase {self.purchase_id}>"
 
+    def to_dict(self):
+        items_purchased_deserialized = json.loads(self.items_purchased)
+        serialized_date = str(self.purchase_date)
+
+        return {
+                "purchase_id": self.purchase_id,
+                "status": self.status,
+                "total_price": self.total_price / 100,
+                "purchase_date": serialized_date,
+                "purchase_type": self.purchase_type,
+                "items_purchased": items_purchased_deserialized,
+        }
+
 
 class RestockPurchaseController(Controller):
     """Controller for restock purchases."""
@@ -45,19 +62,21 @@ class RestockPurchaseController(Controller):
 
     @classmethod
     def add_restock_purchase(cls, purchase_id: str, status: str, total_price: int, purchase_date: datetime,
-                             purchase_type: str, items_purchased: str, user_id: str) -> bool:
+                             purchase_type: str, items_purchased: list, user_id: str) -> bool:
         """
         Add a restock purchase and return when the purchase is added.
         """
         session: Session = cls.get_session()
 
+        items_purchased_serialized = json.dumps(items_purchased)
+
         purchase = RestockPurchaseModel(
             purchase_id=purchase_id,
             status=status,
-            total_price=total_price,
+            total_price=total_price * 100,
             purchase_date=purchase_date,
             purchase_type=purchase_type,
-            items_purchased=items_purchased,
+            items_purchased=items_purchased_serialized,
             user_id=user_id
         )
 
@@ -67,6 +86,10 @@ class RestockPurchaseController(Controller):
         return True
 
     @classmethod
-    def get_restock_purchases(cls, user_id: str) -> RestockPurchaseModel:
+    def get_restock_purchases(cls, user_id: str) -> list:
         """Gets the restock purchases for user with ``user_id``."""
-        return cls.get_query().filter_by(user_id=user_id).all()
+        query_data = cls.get_query().filter_by(user_id=user_id).all()
+
+        restock_purchases = [data.to_dict() for data in query_data]
+
+        return restock_purchases

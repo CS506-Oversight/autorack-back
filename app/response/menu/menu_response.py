@@ -1,5 +1,4 @@
 """Response classes for the main routes."""
-import json
 from dataclasses import dataclass
 from typing import Any
 
@@ -29,16 +28,8 @@ class MenuItemResponse(MessagedResponseMixin, StatusedResponseMixin, HttpOkRespo
         return True
 
     def to_json(self) -> dict[str, Any]:
-        ingredients = json.loads(self.menu_item.ingredients)
-
-        data = {
-            "menu_item_id": self.menu_item.menu_item_id,
-            "description": self.menu_item.description,
-            "ingredients": ingredients,
-        }
-
         return super().to_json() | {
-            KEY_DATA: data
+            KEY_DATA: self.menu_item.to_dict()
         }
 
 

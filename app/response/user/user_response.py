@@ -13,7 +13,7 @@ __all__ = "UserResponse"
 
 @dataclass
 class UserResponse(MessagedResponseMixin, StatusedResponseMixin, HttpOkResponseMixin):
-    """Response class for."""
+    """Response class for user."""
 
     user: UserModel
     operation: str
@@ -29,12 +29,6 @@ class UserResponse(MessagedResponseMixin, StatusedResponseMixin, HttpOkResponseM
         return True
 
     def to_json(self) -> dict[str, Any]:
-        data = json.dumps({
-                'user_id': self.user.user_id,
-                'email': self.user.email,
-                'first_name': self.user.first_name,
-        })
-
         return super().to_json() | {
-            KEY_DATA: data
+            KEY_DATA: self.user.to_dict()
         }

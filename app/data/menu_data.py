@@ -34,6 +34,15 @@ class MenuModel(db.Model):
     def __repr__(self):
         return f"<Menu_Item {self.menu_item_id}>"
 
+    def to_dict(self):
+        ingredients = json.loads(self.ingredients)
+
+        return {
+            "menu_item_id": self.menu_item_id,
+            "description": self.description,
+            "ingredients": ingredients,
+        }
+
 
 class MenuController(Controller):
     """Controller for menu."""
@@ -43,7 +52,7 @@ class MenuController(Controller):
     @classmethod
     def upsert_menu_items(cls, user_id: str, payload: list) -> bool:
         """
-        Add a menu item and return true or false when the item is added.
+        Add/update a menu item and return true or false when the item is added.
         """
         # TODO: MAY NEED TO ADD ROLLBACKS HERE JUST IN CASE
 
@@ -59,7 +68,7 @@ class MenuController(Controller):
                 cls.__update(
                     menu_item_id=menu_item.menu_item_id,
                     user_id=menu_item.user_id,
-                    new_desc=item["description"],
+                    new_description=item["description"],
                     new_ingredients=ingredients_to_str,
                     session=session
                 )
@@ -80,21 +89,9 @@ class MenuController(Controller):
     @classmethod
     def get_menu(cls, user_id: str) -> list:
         """Gets the entire menu for user with ``user_id``."""
-        menu = []
         query_data = cls.get_query().filter_by(user_id=user_id).all()
 
-        for data in query_data:
-            # Deserialize the JSON string into JSON Python object
-            ingredients = json.loads(data.ingredients)
-
-            # Only return data with the following attributes
-            menu_item = {
-                "menu_item_id": data.menu_item_id,
-                "description": data.description,
-                "ingredients": ingredients
-            }
-
-            menu.append(menu_item)
+        menu = [data.to_dict() for data in query_data]
 
         return menu
 
@@ -113,7 +110,8 @@ class MenuController(Controller):
         ).first()
 
     @classmethod
-    def __update(cls, menu_item_id: str, user_id: str, new_desc: str, new_ingredients: str, session: Session) -> None:
+    def __update(cls, menu_item_id: str, user_id: str, new_description: str, new_ingredients: str,
+                 session: Session) -> None:
         session.query(MenuModel).filter(
             and_(
                 MenuModel.user_id == user_id,
@@ -121,7 +119,7 @@ class MenuController(Controller):
             )
         ).update(
             {
-                "description": new_desc,
+                "description": new_description,
                 "ingredients": new_ingredients
             }
         )

@@ -3,12 +3,12 @@ from dataclasses import dataclass
 
 from ..mixin import MessagedResponseMixin, StatusedResponseMixin
 
-__all__ = ("IngredientControlFailedResponse",)
+__all__ = ("RestockPurchaseControlFailedResponse",)
 
 
 @dataclass
-class IngredientControlFailedResponse(MessagedResponseMixin, StatusedResponseMixin):
-    """Response class for the failing response of ingredient control."""
+class RestockPurchaseControlFailedResponse(MessagedResponseMixin, StatusedResponseMixin):
+    """Response class for the failing response of restock purchases control."""
 
     message: str
 

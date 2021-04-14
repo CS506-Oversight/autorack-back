@@ -4,7 +4,7 @@
 EP_ROOT = "/"
 
 # User Routes
-EP_USER = "/users"
+EP_USER = "/user"
 
 # Menu Routes
 EP_MENU = "/menu"

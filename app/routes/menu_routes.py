@@ -13,7 +13,7 @@ __all__ = ("blueprint_menu",)
 blueprint_menu: Blueprint = Blueprint("menu", __name__)
 
 
-@blueprint_menu.route(EP_MENU_ITEM, methods=["GET", "POST", "DELETE", "PATCH"])
+@blueprint_menu.route(EP_MENU_ITEM, methods=["POST", "DELETE", "PATCH"])
 def handle_menu_item():
     data = json.loads(request.data)
     req_method = request.method
@@ -45,9 +45,6 @@ def handle_menu():
 def handle_get_menu(user_id: str, operation: str):
     menu = MenuController.get_menu(user_id=user_id)
 
-    if not menu:
-        return MenuControlFailedResponse(message=f"Failed to get menu for user with user_id: {user_id}")
-
     return MenuResponse(menu=menu, user_id=user_id, operation=operation)
 
 
@@ -57,8 +54,8 @@ def handle_upsert_menu_item(payload: list, user_id: str, operation: str):
         payload=payload,
     )
 
-    if not new_menu_item:
-        return MenuControlFailedResponse(message=f"Failed to add/update menu item(s) for user with user_id: {user_id}")
+    # if not new_menu_item:
+    #     return MenuControlFailedResponse(message=f"Failed to add/update menu item(s) for user with user_id: {user_id}")
 
     return UpsertMenuItemResponse(user_id=user_id, num_items=len(payload), operation=operation+'/updated')
 

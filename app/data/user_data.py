@@ -34,6 +34,13 @@ class UserModel(db.Model):
     def __repr__(self):
         return f"<User {self.user_id}>"
 
+    def to_dict(self):
+        return {
+            "user_id": self.user_id,
+            "email": self.email,
+            "first_name": self.first_name,
+        }
+
 
 class UserController(Controller):
     """Controller for users."""

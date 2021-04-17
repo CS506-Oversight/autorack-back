@@ -3,7 +3,7 @@ import json
 from flask import Blueprint, request
 
 from .operations import *
-from app.response import MenuItemResponse, MenuResponse, MenuControlFailedResponse, UpsertMenuItemResponse
+from app.response import MenuResponse, UpsertMenuItemResponse
 from app.data import MenuController
 
 from .path import EP_MENU_ITEM

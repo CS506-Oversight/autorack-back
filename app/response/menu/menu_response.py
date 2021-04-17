@@ -2,35 +2,10 @@
 from dataclasses import dataclass
 from typing import Any
 
-from app.data import MenuModel
-
 from app.response.keys import KEY_DATA
 from app.response.mixin import MessagedResponseMixin, StatusedResponseMixin, HttpOkResponseMixin
 
-__all__ = ("MenuItemResponse", "MenuResponse", "UpsertMenuItemResponse")
-
-
-@dataclass
-class MenuItemResponse(MessagedResponseMixin, StatusedResponseMixin, HttpOkResponseMixin):
-    """Response class for menu items."""
-
-    menu_item: MenuModel
-    operation: str
-
-    @property
-    def response_message(self) -> str:
-        # [!] Does not handle the case where `menu_item` is `None`
-        # because our type-hinting indicates that there *must* be a model for `menu_item`
-        return f"Menu item {self.operation}. (Menu item: {self.menu_item.menu_item_id})"
-
-    @property
-    def response_ok(self) -> bool:
-        return True
-
-    def to_json(self) -> dict[str, Any]:
-        return super().to_json() | {
-            KEY_DATA: self.menu_item.to_dict()
-        }
+__all__ = ("MenuResponse", "UpsertMenuItemResponse")
 
 
 @dataclass

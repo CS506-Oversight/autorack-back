@@ -3,7 +3,7 @@ import json
 from flask import Blueprint, request
 
 from .operations import *
-from app.response import IngredientResponse, IngredientControlFailedResponse, UpsertIngredientItemResponse
+from app.response import IngredientResponse, UpsertIngredientItemResponse
 from app.data import IngredientController
 
 from .path import EP_INGREDIENT

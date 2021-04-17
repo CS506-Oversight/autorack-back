@@ -5,6 +5,7 @@ from typing import Optional
 from sqlalchemy.orm import Session
 from sqlalchemy import and_
 
+from app.utils import generate_rand_id
 from .base import Controller
 from .config import db
 
@@ -54,33 +55,36 @@ class MenuController(Controller):
         """
         Add/update a menu item and return true or false when the item is added.
         """
-        # TODO: MAY NEED TO ADD ROLLBACKS HERE JUST IN CASE
-
         session: Session = cls.get_session()
 
         for item in payload:
             ingredients_to_str = json.dumps(item["ingredients"])
-            menu_item_id = item["menu_item_id"]
 
-            menu_item = cls.__item_exists(user_id=user_id, menu_item_id=menu_item_id)
-
-            if menu_item:
+            # If menu_item_id is in payload, this is an update, else a new addition
+            if "menu_item_id" in item:
                 cls.__update(
-                    menu_item_id=menu_item.menu_item_id,
-                    user_id=menu_item.user_id,
+                    menu_item_id=item["menu_item_id"],
+                    user_id=user_id,
                     new_description=item["description"],
                     new_ingredients=ingredients_to_str,
                     session=session
                 )
-            else:
-                menu_item = MenuModel(
-                    menu_item_id=menu_item_id,
-                    description=item["description"],
-                    ingredients=ingredients_to_str,
-                    user_id=user_id,
-                )
 
-                session.add(menu_item)
+                continue
+
+            # Generate random menu_item_id for new menu_item
+            random_menu_id = generate_rand_id("m_")
+            while cls.__item_exists(user_id=user_id, menu_item_id=random_menu_id):
+                random_menu_id = generate_rand_id("m_")
+
+            menu_item = MenuModel(
+                menu_item_id=random_menu_id,
+                description=item["description"],
+                ingredients=ingredients_to_str,
+                user_id=user_id,
+            )
+
+            session.add(menu_item)
 
         session.commit()
 
@@ -95,23 +99,26 @@ class MenuController(Controller):
 
         return menu
 
-    # @classmethod
-    # def delete_menu_item(cls, menu_item_id: str, user_id: str) -> MenuModel:
-    #     """TODO: Delete the menu item with ``menu_item_id`` for user with ``user_id``.."""
-    #     pass
-
     @classmethod
-    def __item_exists(cls, user_id: str, menu_item_id: str) -> Optional[MenuModel]:
+    def __item_exists(cls, user_id: str, menu_item_id: str) -> bool:
+        """
+        Private function that checks if a menu item exists. Returns true
+        if the item exists, else false if the item exists.
+        """
         return cls.get_query().filter(
             and_(
                 MenuModel.menu_item_id == menu_item_id,
                 MenuModel.user_id == user_id
             )
-        ).first()
+        ).first() is not None
 
     @classmethod
     def __update(cls, menu_item_id: str, user_id: str, new_description: str, new_ingredients: str,
                  session: Session) -> None:
+        """
+        Private function that updates the details of a menu item. Users are only able to
+        Update the description and ingredients of a menu item
+        """
         session.query(MenuModel).filter(
             and_(
                 MenuModel.user_id == user_id,

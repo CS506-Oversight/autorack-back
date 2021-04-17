@@ -3,9 +3,11 @@ import datetime
 import json
 
 from sqlalchemy.orm import Session
+from sqlalchemy import and_
 
 from .base import Controller
 from .config import db
+from app.utils import generate_rand_id
 
 __all__ = ("RestockPurchaseModel", "RestockPurchaseController")
 
@@ -61,7 +63,7 @@ class RestockPurchaseController(Controller):
     model = RestockPurchaseModel
 
     @classmethod
-    def add_restock_purchase(cls, purchase_id: str, status: str, total_price: int, purchase_date: datetime,
+    def add_restock_purchase(cls, status: str, total_price: int, purchase_date: datetime,
                              purchase_type: str, items_purchased: list, user_id: str) -> bool:
         """
         Add a restock purchase and return when the purchase is added.
@@ -70,8 +72,13 @@ class RestockPurchaseController(Controller):
 
         items_purchased_serialized = json.dumps(items_purchased)
 
+        # Generate random purchase_id for new restock purchase
+        random_purchase_id = generate_rand_id("p_")
+        while cls.__item_exists(user_id=user_id, purchase_id=random_purchase_id):
+            random_purchase_id = generate_rand_id("p_")
+
         purchase = RestockPurchaseModel(
-            purchase_id=purchase_id,
+            purchase_id=random_purchase_id,
             status=status,
             total_price=total_price * 100,
             purchase_date=purchase_date,
@@ -93,3 +100,16 @@ class RestockPurchaseController(Controller):
         restock_purchases = [data.to_dict() for data in query_data]
 
         return restock_purchases
+
+    @classmethod
+    def __item_exists(cls, user_id: str, purchase_id: str) -> bool:
+        """
+        Private function that checks if a menu item exists. Returns true
+        if the item exists, else false if the item exists.
+        """
+        return cls.get_query().filter(
+            and_(
+                RestockPurchaseModel.purchase_id == purchase_id,
+                RestockPurchaseModel.user_id == user_id
+            )
+        ).first() is not None

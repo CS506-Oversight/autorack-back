@@ -1,10 +1,12 @@
 """Data model and controller for ingredients."""
 import json
+
 from typing import Optional
 
 from sqlalchemy.orm import Session
 from sqlalchemy import and_
 
+from app.utils import generate_rand_id
 from .base import Controller
 from .config import db
 
@@ -23,14 +25,12 @@ class IngredientModel(db.Model):
     measurement = db.Column(db.String(), nullable=False)
     unit = db.Column(db.Integer(), nullable=False)
     name = db.Column(db.String(), nullable=False)
-    unit_price = db.Column(db.Integer(), nullable=False)
     user_id = db.Column(db.String(), nullable=False)
 
-    def __init__(self, ingredient_id: str, measurement: str, unit: int, unit_price: int, user_id: str, name: str):
+    def __init__(self, ingredient_id: str, measurement: str, unit: int, user_id: str, name: str):
         self.ingredient_id = ingredient_id
         self.measurement = measurement
         self.unit = unit
-        self.unit_price = unit_price
         self.user_id = user_id
         self.name = name
 
@@ -42,8 +42,7 @@ class IngredientModel(db.Model):
             "name": self.name,
             "ingredient_id": self.ingredient_id,
             "measurement": self.measurement,
-            "unit": self.unit,
-            "unit_price": self.unit_price / 100
+            "unit": self.unit
         }
 
 
@@ -60,31 +59,38 @@ class IngredientController(Controller):
         session: Session = cls.get_session()
 
         for item in payload:
-            ingredient_id = item["ingredient_id"]  # TODO: SHOULD BE GENERATED RANDOMLY
+            # If ingredient_id already exists, then this is an update
+            if "ingredient_id" in item:
+                ingredient_id = item["ingredient_id"]
 
-            ingredient = cls.__item_exists(user_id=user_id, ingredient_id=ingredient_id)
-
-            if ingredient:
+                # Update the ingredient
                 cls.__update(
-                    ingredient_id=ingredient.ingredient_id,
-                    user_id=ingredient.user_id,
+                    ingredient_id=ingredient_id,
+                    user_id=user_id,
                     new_unit=item["unit"],
                     new_measurement=item["measurement"],
                     new_name=item["name"],
-                    new_unit_price=item["unit_price"] * 100,
                     session=session
                 )
-            else:
-                ingredient = IngredientModel(
-                    ingredient_id=ingredient_id,
-                    measurement=item["measurement"],
-                    unit=item["unit"],
-                    unit_price=item["unit_price"] * 100,
-                    user_id=user_id,
-                    name=item["name"]
-                )
 
-                session.add(ingredient)
+                continue
+
+            # Get random id for ingredient
+            rand_ingredient_id = generate_rand_id("i_")
+            print(rand_ingredient_id)
+
+            while cls.__item_exists(user_id=user_id, ingredient_id=rand_ingredient_id):
+                rand_ingredient_id = generate_rand_id("i_")
+
+            ingredient = IngredientModel(
+                ingredient_id=rand_ingredient_id,
+                measurement=item["measurement"],
+                unit=item["unit"],
+                user_id=user_id,
+                name=item["name"]
+            )
+
+            session.add(ingredient)
 
         session.commit()
 
@@ -100,22 +106,17 @@ class IngredientController(Controller):
         return ingredients
 
     @classmethod
-    def delete_ingredient(cls, ingredient_id: str, user_id: str) -> IngredientModel:
-        """Deletes the ingredient with ``ingredient_id`` for user with ``user_id``."""
-        pass
-
-    @classmethod
-    def __item_exists(cls, user_id: str, ingredient_id: str) -> Optional[IngredientModel]:
+    def __item_exists(cls, user_id: str, ingredient_id: str) -> bool:
         return cls.get_query().filter(
             and_(
                 IngredientModel.ingredient_id == ingredient_id,
                 IngredientModel.user_id == user_id
             )
-        ).first()
+        ).first() is not None
 
     @classmethod
     def __update(cls, ingredient_id: str, user_id: str, new_unit: int, new_measurement: str,
-                 new_name: str, new_unit_price: int, session: Session) -> None:
+                 new_name: str, session: Session) -> None:
         session.query(IngredientModel).filter(
             and_(
                 IngredientModel.user_id == user_id,
@@ -125,7 +126,6 @@ class IngredientController(Controller):
             {
                 "unit": new_unit,
                 "measurement": new_measurement,
-                "unit_price": new_unit_price,
                 "name": new_name
             }
         )

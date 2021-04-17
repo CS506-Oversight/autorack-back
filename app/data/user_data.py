@@ -50,17 +50,8 @@ class UserController(Controller):
     @classmethod
     def add_user(cls, user_id: str, first_name: str, last_name: str, created_at: datetime, email: str) -> bool:
         """
-        Add a user and return if the user is added or not.
-
-        If ``email`` or ``user_id`` already exists
-        this directly returns ``False`` without performing any additional actions.
+        Add a user and return when the user is added.
         """
-        email_check = cls.get_query().filter_by(email=email).first() is not None
-        user_id_check = cls.get_query().filter_by(user_id=user_id).first() is not None
-        
-        if email_check or user_id_check:
-            return False
-
         session: Session = cls.get_session()
 
         model = UserModel(
@@ -80,8 +71,3 @@ class UserController(Controller):
     def get_user(cls, user_id: str) -> UserModel:
         """Gets the user with ``user_id``."""
         return cls.get_query().filter_by(user_id=user_id).first()
-
-    @classmethod
-    def update_user(cls, user_id: str) -> UserModel:
-        """TODO: Update the user with ``user_id``."""
-        pass

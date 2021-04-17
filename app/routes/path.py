@@ -7,7 +7,6 @@ EP_ROOT = "/"
 EP_USER = "/user"
 
 # Menu Routes
-EP_MENU = "/menu"
 EP_MENU_ITEM = "/menu-item"
 
 # Ingredient Routes

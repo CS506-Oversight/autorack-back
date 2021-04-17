@@ -1,3 +1,5 @@
+import os
+
 import pytest
 
 from app import create_app
@@ -10,9 +12,15 @@ from app.data.base import Controller
 def app():
     app = create_app()
 
+    # Set db to testing db so data in dev db doesn't get cleared
+    app.config["SQLALCHEMY_DATABASE_URI"] = os.getenv("SQLALCHEMY_TEST_DATABASE_URI")
     # https://stackoverflow.com/a/30611846/11571888
     app.config["DEBUG"] = True
     app.config["TESTING"] = True
+
+    # Create all the tables in the testing db
+    app.app_context().push()
+    db.create_all()
 
     return app
 

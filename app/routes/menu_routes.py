@@ -15,16 +15,19 @@ blueprint_menu: Blueprint = Blueprint("menu", __name__)
 
 @blueprint_menu.route(EP_MENU_ITEM, methods=["GET", "POST"])
 def handle_menu_item():
-    data = json.loads(request.data)
-    user_id = data["user_id"]
     req_method = request.method
 
     if req_method == "POST":
+        data = json.loads(request.data)
+        user_id = data["id"]
+
         return handle_upsert_menu_item(
             user_id=user_id,
             payload=data["payload"],
             operation=POST_OPERATION + "/updated"
         )
+
+    user_id = request.args.get("user_id", type=str)
 
     return handle_get_menu(user_id=user_id, operation=GET_OPERATION)
 

@@ -21,10 +21,10 @@ class UserModel(db.Model):
     user_id = db.Column(db.String(), primary_key=True)
     first_name = db.Column(db.String(), nullable=False)
     last_name = db.Column(db.String(), nullable=False)
-    created_at = db.Column(db.DateTime(), nullable=False)
+    created_at = db.Column(db.BigInteger(), nullable=False)
     email = db.Column(db.String(), unique=True, nullable=False)
 
-    def __init__(self, user_id: str, first_name: str, last_name: str, created_at: datetime, email: str):
+    def __init__(self, user_id: str, first_name: str, last_name: str, created_at: int, email: str):
         self.user_id = user_id
         self.first_name = first_name
         self.last_name = last_name
@@ -36,9 +36,10 @@ class UserModel(db.Model):
 
     def to_dict(self):
         return {
-            "user_id": self.user_id,
+            "id": self.user_id,
             "email": self.email,
-            "first_name": self.first_name,
+            "firstName": self.first_name,
+            "lastName": self.last_name
         }
 
 
@@ -48,7 +49,7 @@ class UserController(Controller):
     model = UserModel
 
     @classmethod
-    def add_user(cls, user_id: str, first_name: str, last_name: str, created_at: datetime, email: str) -> bool:
+    def add_user(cls, user_id: str, first_name: str, last_name: str, created_at: int, email: str) -> bool:
         """
         Add a user and return when the user is added.
         """

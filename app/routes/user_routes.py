@@ -15,20 +15,23 @@ blueprint_user: Blueprint = Blueprint("user", __name__)
 
 @blueprint_user.route(EP_USER, methods=["GET", "POST"])
 def handle_user():
-    data = json.loads(request.data)
     req_method = request.method
 
     if req_method == "POST":
+        data = json.loads(request.data)
+
         return handle_add(
-            user_id=data["user_id"],
-            first_name=data["first_name"],
-            last_name=data["last_name"],
-            created_at=data['created_at'],
+            user_id=data["id"],
+            first_name=data["firstName"],
+            last_name=data["lastName"],
+            created_at=data['createdAt'],
             email=data['email'],
             operation=POST_OPERATION
         )
 
-    return handle_get(user_id=data['user_id'], operation=GET_OPERATION)
+    user_id = request.args.get("user_id", type=str)
+
+    return handle_get(user_id=user_id, operation=GET_OPERATION)
 
 
 def handle_get(user_id: str, operation: str):
@@ -41,7 +44,7 @@ def handle_get(user_id: str, operation: str):
     return UserResponse(user=user, operation=operation)
 
 
-def handle_add(user_id: str, first_name: str, last_name: str, created_at: str, email: str, operation: str):
+def handle_add(user_id: str, first_name: str, last_name: str, created_at: int, email: str, operation: str):
     """ Handles post requests for users. """
     new_user = UserController.add_user(
         user_id=user_id,

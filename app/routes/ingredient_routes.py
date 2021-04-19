@@ -15,16 +15,18 @@ blueprint_ingredient: Blueprint = Blueprint("ingredient", __name__)
 
 @blueprint_ingredient.route(EP_INGREDIENT, methods=["POST", "GET"])
 def handle_menu_item():
-    data = json.loads(request.data)
     req_method = request.method
-    user_id = data["user_id"]
 
     if req_method == "POST":
+        data = json.loads(request.data)
+
         return handle_upsert_ingredient(
-            user_id=user_id,
+            user_id=data["id"],
             payload=data["payload"],
             operation=POST_OPERATION + "/updated"
         )
+
+    user_id = request.args.get("user_id", type=str)
 
     return handle_get_ingredients(user_id=user_id, operation=GET_OPERATION)
 

@@ -1,1 +1,1 @@
-from .generate_rand_id import generate_rand_id
+from .generate_rand_id import generate_rand_id, generate_rand_purchase_id

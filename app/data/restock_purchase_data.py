@@ -7,7 +7,7 @@ from sqlalchemy import and_
 
 from .base import Controller
 from .config import db
-from app.utils import generate_rand_id
+from app.utils import generate_rand_purchase_id
 
 __all__ = ("RestockPurchaseModel", "RestockPurchaseController")
 
@@ -24,13 +24,14 @@ class RestockPurchaseModel(db.Model):
     status = db.Column(db.String(), nullable=False)
     # Should be stored in pennies for precision
     total_price = db.Column(db.Integer(), nullable=False)
-    purchase_date = db.Column(db.DateTime(), nullable=False)
+    # Will be a string in the form MM/DD/YYYY
+    purchase_date = db.Column(db.String(), nullable=False)
     purchase_type = db.Column(db.String(), nullable=False)
     # Should be saved as a serialized JSON object
     items_purchased = db.Column(db.String(), nullable=False)
     user_id = db.Column(db.String(), nullable=False)
 
-    def __init__(self, purchase_id: str, status: str, total_price: int, purchase_date: datetime, purchase_type: str,
+    def __init__(self, purchase_id: str, status: str, total_price: int, purchase_date: str, purchase_type: str,
                  items_purchased: str, user_id: str):
         self.purchase_id = purchase_id
         self.status = status
@@ -45,15 +46,14 @@ class RestockPurchaseModel(db.Model):
 
     def to_dict(self):
         items_purchased_deserialized = json.loads(self.items_purchased)
-        serialized_date = str(self.purchase_date)
 
         return {
-                "purchase_id": self.purchase_id,
+                "id": self.purchase_id,
                 "status": self.status,
-                "total_price": self.total_price / 100,
-                "purchase_date": serialized_date,
-                "purchase_type": self.purchase_type,
-                "items_purchased": items_purchased_deserialized,
+                "totalPrice": self.total_price / 100,
+                "purchaseDate": self.purchase_date,
+                "type": self.purchase_type,
+                "purchasedItems": items_purchased_deserialized,
         }
 
 
@@ -63,7 +63,7 @@ class RestockPurchaseController(Controller):
     model = RestockPurchaseModel
 
     @classmethod
-    def add_restock_purchase(cls, status: str, total_price: int, purchase_date: datetime,
+    def add_restock_purchase(cls, status: str, total_price: int, purchase_date: str,
                              purchase_type: str, items_purchased: list, user_id: str) -> bool:
         """
         Add a restock purchase and return when the purchase is added.
@@ -73,9 +73,9 @@ class RestockPurchaseController(Controller):
         items_purchased_serialized = json.dumps(items_purchased)
 
         # Generate random purchase_id for new restock purchase
-        random_purchase_id = generate_rand_id("p_")
+        random_purchase_id = generate_rand_purchase_id()
         while cls.__item_exists(user_id=user_id, purchase_id=random_purchase_id):
-            random_purchase_id = generate_rand_id("p_")
+            random_purchase_id = generate_rand_purchase_id()
 
         purchase = RestockPurchaseModel(
             purchase_id=random_purchase_id,
@@ -113,3 +113,44 @@ class RestockPurchaseController(Controller):
                 RestockPurchaseModel.user_id == user_id
             )
         ).first() is not None
+
+    # @classmethod
+    # def add_new(cls):
+    #     items_purchased = [
+    #         {
+    #             'description': 'Doritos',
+    #             'unitPrice': 2.25,
+    #             'quantity': 10,
+    #         },
+    #         {
+    #             'description': 'Dry Aged Lamb',
+    #             'unitPrice': 50.0,
+    #             'quantity': 5,
+    #         },
+    #         {
+    #             'description': 'Moose Chops',
+    #             'unitPrice': 99.75,
+    #             'quantity': 2,
+    #         }
+    #     ]
+    #
+    #     total_price = 0.0
+    #     for elm in items_purchased:
+    #         total_price += elm['unitPrice']*elm['quantity']
+    #
+    #     items_purchased_serialized = json.dumps(items_purchased)
+    #
+    #     purchase = RestockPurchaseModel(
+    #         purchase_id=generate_rand_purchase_id(),
+    #         status='completed',
+    #         total_price=int(total_price * 100),
+    #         purchase_date="04/02/2021",
+    #         purchase_type="Auto",
+    #         items_purchased=items_purchased_serialized,
+    #         user_id="jRD9JUG1fzMP3FoMopfIivfgBh42"
+    #     )
+    #
+    #     session: Session = cls.get_session()
+    #
+    #     session.add(purchase)
+    #     session.commit()

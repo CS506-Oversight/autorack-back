@@ -15,8 +15,7 @@ blueprint_restock_purchase: Blueprint = Blueprint("restock_purchase", __name__)
 
 @blueprint_restock_purchase.route(EP_RESTOCK, methods=["GET"])
 def get_restock_purchases():
-    data = json.loads(request.data)
-    user_id = data["user_id"]
+    user_id = request.args.get("user_id", type=str)
 
     restock_purchases = RestockPurchaseController.get_restock_purchases(user_id=user_id)
 

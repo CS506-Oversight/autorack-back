@@ -25,11 +25,13 @@ class MenuModel(db.Model):
     user_id = db.Column(db.String(), nullable=False)
     # Should be a serialized JSON object
     ingredients = db.Column(db.String(), nullable=True)
+    name = db.Column(db.String(), nullable=True)
 
-    def __init__(self, menu_item_id: str, description: str, ingredients: str, user_id: str):
+    def __init__(self, menu_item_id: str, description: str, ingredients: str, user_id: str, name: str):
         self.menu_item_id = menu_item_id
         self.description = description
         self.ingredients = ingredients
+        self.name = name
         self.user_id = user_id
 
     def __repr__(self):
@@ -39,9 +41,10 @@ class MenuModel(db.Model):
         ingredients = json.loads(self.ingredients)
 
         return {
-            "menu_item_id": self.menu_item_id,
+            "id": self.menu_item_id,
             "description": self.description,
             "ingredients": ingredients,
+            "name": self.name
         }
 
 
@@ -61,12 +64,13 @@ class MenuController(Controller):
             ingredients_to_str = json.dumps(item["ingredients"])
 
             # If menu_item_id is in payload, this is an update, else a new addition
-            if "menu_item_id" in item:
+            if "id" in item:
                 cls.__update(
-                    menu_item_id=item["menu_item_id"],
+                    menu_item_id=item["id"],
                     user_id=user_id,
                     new_description=item["description"],
                     new_ingredients=ingredients_to_str,
+                    new_name=item["name"],
                     session=session
                 )
 
@@ -82,6 +86,7 @@ class MenuController(Controller):
                 description=item["description"],
                 ingredients=ingredients_to_str,
                 user_id=user_id,
+                name=item["name"]
             )
 
             session.add(menu_item)
@@ -114,7 +119,7 @@ class MenuController(Controller):
 
     @classmethod
     def __update(cls, menu_item_id: str, user_id: str, new_description: str, new_ingredients: str,
-                 session: Session) -> None:
+                 new_name: str, session: Session) -> None:
         """
         Private function that updates the details of a menu item. Users are only able to
         Update the description and ingredients of a menu item
@@ -127,7 +132,8 @@ class MenuController(Controller):
         ).update(
             {
                 "description": new_description,
-                "ingredients": new_ingredients
+                "ingredients": new_ingredients,
+                "name": new_name
             }
         )
 

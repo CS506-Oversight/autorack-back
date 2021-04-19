@@ -38,10 +38,12 @@ class IngredientModel(db.Model):
         return f"<Ingredient {self.ingredient_id}>"
 
     def to_dict(self):
+        measure_deserialized = json.loads(self.measurement)
+
         return {
             "name": self.name,
-            "ingredient_id": self.ingredient_id,
-            "measurement": self.measurement,
+            "id": self.ingredient_id,
+            "measure": measure_deserialized,
             "unit": self.unit
         }
 
@@ -59,16 +61,17 @@ class IngredientController(Controller):
         session: Session = cls.get_session()
 
         for item in payload:
+            measure_serialized = json.dumps(item["measure"])
             # If ingredient_id already exists, then this is an update
-            if "ingredient_id" in item:
-                ingredient_id = item["ingredient_id"]
+            if "id" in item:
+                ingredient_id = item["id"]
 
                 # Update the ingredient
                 cls.__update(
                     ingredient_id=ingredient_id,
                     user_id=user_id,
                     new_unit=item["unit"],
-                    new_measurement=item["measurement"],
+                    new_measurement=measure_serialized,
                     new_name=item["name"],
                     session=session
                 )
@@ -77,14 +80,12 @@ class IngredientController(Controller):
 
             # Get random id for ingredient
             rand_ingredient_id = generate_rand_id("i_")
-            print(rand_ingredient_id)
-
             while cls.__item_exists(user_id=user_id, ingredient_id=rand_ingredient_id):
                 rand_ingredient_id = generate_rand_id("i_")
 
             ingredient = IngredientModel(
                 ingredient_id=rand_ingredient_id,
-                measurement=item["measurement"],
+                measurement=measure_serialized,
                 unit=item["unit"],
                 user_id=user_id,
                 name=item["name"]

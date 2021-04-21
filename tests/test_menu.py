@@ -5,11 +5,12 @@ from app.routes.operations import *
 
 
 def test_menu_add_item(client):
+    user_id = "kjhgvjklerlsjoife"
     payload = {
-        "user_id": "kjhgvjklerlsjoife",
         "payload": [
             {
-                "description": "new_item",
+                "name": "new item name",
+                "description": "new item desc",
                 "ingredients": [
                     {
                         "ingredient_id": "i_jkkkkjkkjkjkljlkjl",
@@ -20,19 +21,20 @@ def test_menu_add_item(client):
         ]
     }
 
-    response = client.post(EP_MENU_ITEM, data=json.dumps(payload))
+    response = client.post(EP_MENU_ITEM + f'?user_id={user_id}', data=json.dumps(payload))
 
     assert response.json["ok"]
     assert response.status_code == 200
     assert response.json["message"] == \
-           f"User {POST_OPERATION+'/updated'} {len(payload['payload'])} menu items. (User: {payload['user_id']})"
+           f"User {POST_OPERATION+'/updated'} {len(payload['payload'])} menu items. (User: {user_id})"
 
 
 def test_menu_add_two_items(client):
+    user_id = "kjhgvjklerlsjoife"
     payload = {
-        "user_id": "kjhgvjklerlsjoife",
         "payload": [
             {
+                "name": "new item name 1",
                 "description": "new_item",
                 "ingredients": [
                     {
@@ -42,6 +44,7 @@ def test_menu_add_two_items(client):
                 ]
             },
             {
+                "name": "new item name 2",
                 "description": "new_item_2",
                 "ingredients": [
                     {
@@ -53,19 +56,20 @@ def test_menu_add_two_items(client):
         ]
     }
 
-    response = client.post(EP_MENU_ITEM, data=json.dumps(payload))
+    response = client.post(EP_MENU_ITEM + f'?user_id={user_id}', data=json.dumps(payload))
 
     assert response.json["ok"]
     assert response.status_code == 200
     assert response.json["message"] == \
-           f"User {POST_OPERATION + '/updated'} {len(payload['payload'])} menu items. (User: {payload['user_id']})"
+           f"User {POST_OPERATION + '/updated'} {len(payload['payload'])} menu items. (User: {user_id})"
 
 
 def test_menu_get_menu_multiple_items(client):
+    user_id = "jkdsnkfkwdfhkjoc"
     post_payload = {
-        "user_id": "jkdsnkfkwdfhkjoc",
         "payload": [
             {
+                "name": "new name",
                 "description": "new_item1",
                 "ingredients": [
                     {
@@ -75,6 +79,7 @@ def test_menu_get_menu_multiple_items(client):
                 ]
             },
             {
+                "name": "new name",
                 "description": "new_item_2",
                 "ingredients": [
                     {
@@ -84,6 +89,7 @@ def test_menu_get_menu_multiple_items(client):
                 ]
             },
             {
+                "name": "new name",
                 "description": "new_item_3",
                 "ingredients": [
                     {
@@ -95,26 +101,20 @@ def test_menu_get_menu_multiple_items(client):
         ]
     }
 
-    client.post(EP_MENU_ITEM, data=json.dumps(post_payload))
+    client.post(EP_MENU_ITEM + f'?user_id={user_id}', data=json.dumps(post_payload))
 
-    get_payload = {
-        "user_id": "jkdsnkfkwdfhkjoc"
-    }
-
-    get_response = client.get(EP_MENU_ITEM, data=json.dumps(get_payload))
+    get_response = client.get(EP_MENU_ITEM + f'?user_id={user_id}')
 
     assert get_response.json["ok"]
     assert get_response.status_code == 200
-    assert get_response.json["message"] == f"Menu {GET_OPERATION}. (User: {get_payload['user_id']})"
+    assert get_response.json["message"] == f"Menu {GET_OPERATION}. (User: {user_id})"
     assert len(get_response.json["data"]) == 3
 
 
 def test_menu_get_empty_menu(client):
-    payload = {
-        "user_id": "jkdsnkfkwdfhkjoc"
-    }
+    user_id = "jkdsnkfkwdfhkjoc"
 
-    response = client.get(EP_MENU_ITEM, data=json.dumps(payload))
+    response = client.get(EP_MENU_ITEM + f'?user_id={user_id}')
 
     assert response.json["ok"]
     assert response.status_code == 200
@@ -123,10 +123,11 @@ def test_menu_get_empty_menu(client):
 
 
 def test_menu_update_menu_item(client):
+    user_id = "kjhgvjklerlsjoife"
     post_payload = {
-        "user_id": "kjhgvjklerlsjoife",
         "payload": [
             {
+                "name": "item name",
                 "description": "NEW ITEM",
                 "ingredients": [
                     {
@@ -138,21 +139,17 @@ def test_menu_update_menu_item(client):
         ]
     }
 
-    client.post(EP_MENU_ITEM, data=json.dumps(post_payload))
+    client.post(EP_MENU_ITEM + f'?user_id={user_id}', data=json.dumps(post_payload))
 
-    get_payload = {
-        "user_id": "kjhgvjklerlsjoife",
-    }
+    get_response = client.get(EP_MENU_ITEM + f'?user_id={user_id}')
 
-    get_response = client.get(EP_MENU_ITEM, data=json.dumps(get_payload))
-
-    menu_item_id = get_response.json["data"][0]["menu_item_id"]
+    menu_item_id = get_response.json["data"][0]["id"]
 
     update_payload = {
-        "user_id": "kjhgvjklerlsjoife",
         "payload": [
             {
-                "menu_item_id": menu_item_id,
+                "id": menu_item_id,
+                "name": "UPDATED NAME",
                 "description": "UPDATED ITEM",
                 "ingredients": [
                     {
@@ -164,12 +161,12 @@ def test_menu_update_menu_item(client):
         ]
     }
 
-    client.post(EP_MENU_ITEM, data=json.dumps(update_payload))
-    update_response = client.get(EP_MENU_ITEM, data=json.dumps({"user_id": "kjhgvjklerlsjoife"}))
+    client.post(EP_MENU_ITEM + f'?user_id={user_id}', data=json.dumps(update_payload))
+    update_response = client.get(EP_MENU_ITEM + f'?user_id={user_id}')
 
     assert update_response.json["ok"]
     assert update_response.status_code == 200
-    assert update_response.json["message"] == f"Menu {GET_OPERATION}. (User: {update_payload['user_id']})"
+    assert update_response.json["message"] == f"Menu {GET_OPERATION}. (User: {user_id})"
     assert (get_response.json["data"][0]["description"] == "NEW ITEM") \
            and (update_response.json["data"][0]["description"] == "UPDATED ITEM")
     assert get_response.json["data"][0]["ingredients"] == update_response.json["data"][0]["ingredients"]

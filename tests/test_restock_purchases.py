@@ -6,16 +6,14 @@ from app.data import RestockPurchaseController, RestockPurchaseModel
 
 
 def test_restock_get_empty_restock_purchases(client):
-    payload = {
-        "user_id": "kjhgvjklerlsjoife"
-    }
+    user_id = "kjhgvjklerlsjoife"
 
-    response = client.get(EP_RESTOCK, data=json.dumps(payload))
+    response = client.get(EP_RESTOCK + f"?user_id={user_id}")
 
     assert response.json["ok"]
     assert response.status_code == 200
     assert response.json["message"] == \
-           f"User {GET_OPERATION} 0 restock purchases. (User: {payload['user_id']})"
+           f"User {GET_OPERATION} 0 restock purchases. (User: {user_id})"
 
 
 def test_restock_add_three_restock_purchases():
@@ -137,14 +135,14 @@ def test_restock_add_one_check_price(client):
     total_price = query_data[0].total_price
     assert total_price == (purchase["total_price"] * 100) == 1211
 
-    response = client.get(EP_RESTOCK, data=json.dumps({"user_id": user_id}))
+    response = client.get(EP_RESTOCK + f"?user_id={user_id}")
 
     assert response.json["ok"]
     assert response.status_code == 200
     assert response.json["message"] == \
            f"User {GET_OPERATION} 1 restock purchases. (User: {user_id})"
     assert len(response.json["data"]) == 1
-    assert response.json["data"][0]["total_price"] == purchase["total_price"] == (total_price / 100)
+    assert response.json["data"][0]["totalPrice"] == purchase["total_price"] == (total_price / 100)
 
 
 def test_restock_add_two_check_items_purchased(client):
@@ -219,12 +217,12 @@ def test_restock_add_two_check_items_purchased(client):
             purchase_type=["purchase_type"], items_purchased=purchase["items_purchased"], user_id=user_id
         )
 
-    response = client.get(EP_RESTOCK, data=json.dumps({"user_id": user_id}))
+    response = client.get(EP_RESTOCK + f"?user_id={user_id}")
 
     assert response.json["ok"]
     assert response.status_code == 200
     assert response.json["message"] == \
            f"User {GET_OPERATION} 2 restock purchases. (User: {user_id})"
     assert len(response.json["data"]) == 2
-    assert len(response.json["data"][0]["items_purchased"]) == 3
-    assert len(response.json["data"][1]["items_purchased"]) == 6
+    assert len(response.json["data"][0]["purchasedItems"]) == 3
+    assert len(response.json["data"][1]["purchasedItems"]) == 6

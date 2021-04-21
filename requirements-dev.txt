@@ -3,6 +3,7 @@ bandit
 pydocstyle
 flake8
 flake8-quotes
+pint
 pylint
 pylint-flask
 pylint-flask-sqlalchemy

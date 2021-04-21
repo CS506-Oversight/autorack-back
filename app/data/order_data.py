@@ -58,8 +58,6 @@ class OrderController(Controller):
         ordered_items_to_str = ''
         for item in payload:
             ordered_items_to_str += json.dumps(item)
-        print("ordered Items:::::" + ordered_items_to_str)
-            # Generate random menu_item_id for new menu_item
         random_order_id = generate_rand_id("o_")
         while cls.__order_exists(user_id=user_id, order_id=random_order_id):
             random_order_id = generate_rand_id("o_")
@@ -69,7 +67,6 @@ class OrderController(Controller):
             order=ordered_items_to_str,
             user_id=user_id,
         )
-        print(final_order.order)
         session.add(final_order)
         session.commit()
 

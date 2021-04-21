@@ -5,6 +5,7 @@ from flask import Blueprint, request
 from .operations import *
 from app.response import OrderResponse, UpsertOrderResponse
 from app.data import OrderController
+from app.inventory import InventoryController
 
 from .path import EP_ORDER
 
@@ -14,10 +15,10 @@ blueprint_order: Blueprint = Blueprint("order", __name__)
 
 
 @blueprint_order.route(EP_ORDER, methods=["GET", "POST"])
-def handle_menu_item():
-    print(request.data)
+def handle_order():
+    user_id = request.args.get("user_id", type=str)
     data = json.loads(request.data)
-    user_id = data["user_id"]
+    InventoryController.updateInventory(data["payload"], user_id)
     req_method = request.method
 
     if req_method == "POST":
@@ -26,7 +27,6 @@ def handle_menu_item():
             payload=data["payload"],
             operation=POST_OPERATION + "/updated"
         )
-    user_id = request.args.get("user_id", type=str)
     return handle_get_orders(user_id=user_id, operation=GET_OPERATION)
 
 

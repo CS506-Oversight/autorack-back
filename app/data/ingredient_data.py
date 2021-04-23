@@ -23,14 +23,16 @@ class IngredientModel(db.Model):
 
     ingredient_id = db.Column(db.String(), primary_key=True)
     measurement = db.Column(db.String(), nullable=False)
-    unit = db.Column(db.Integer(), nullable=False)
+    current_stock = db.Column(db.Integer(), nullable=False)
     name = db.Column(db.String(), nullable=False)
     user_id = db.Column(db.String(), nullable=False)
+    capacity = db.Column(db.Integer(), nullable=False)
 
-    def __init__(self, ingredient_id: str, measurement: str, unit: int, user_id: str, name: str):
+    def __init__(self, ingredient_id: str, measurement: str, current_stock: int, user_id: str, name: str, capacity: int):
         self.ingredient_id = ingredient_id
         self.measurement = measurement
-        self.unit = unit
+        self.capacity = capacity
+        self.current_stock = current_stock
         self.user_id = user_id
         self.name = name
 
@@ -44,7 +46,8 @@ class IngredientModel(db.Model):
             "name": self.name,
             "id": self.ingredient_id,
             "measure": measure_deserialized,
-            "unit": self.unit
+            "currentStock": self.current_stock,
+            "capacity": self.capacity
         }
 
 
@@ -70,9 +73,10 @@ class IngredientController(Controller):
                 cls.__update(
                     ingredient_id=ingredient_id,
                     user_id=user_id,
-                    new_unit=item["unit"],
+                    new_current_stock=item["currentStock"],
                     new_measurement=measure_serialized,
                     new_name=item["name"],
+                    new_capacity=item["capacity"],
                     session=session
                 )
 
@@ -86,9 +90,10 @@ class IngredientController(Controller):
             ingredient = IngredientModel(
                 ingredient_id=rand_ingredient_id,
                 measurement=measure_serialized,
-                unit=item["unit"],
+                current_stock=item["currentStock"],
                 user_id=user_id,
-                name=item["name"]
+                name=item["name"],
+                capacity=item["capacity"]
             )
 
             session.add(ingredient)
@@ -116,8 +121,8 @@ class IngredientController(Controller):
         ).first() is not None
 
     @classmethod
-    def __update(cls, ingredient_id: str, user_id: str, new_unit: int, new_measurement: str,
-                 new_name: str, session: Session) -> None:
+    def __update(cls, ingredient_id: str, user_id: str, new_current_stock: int, new_measurement: str,
+                 new_name: str, new_capacity: int, session: Session) -> None:
         session.query(IngredientModel).filter(
             and_(
                 IngredientModel.user_id == user_id,
@@ -125,9 +130,10 @@ class IngredientController(Controller):
             )
         ).update(
             {
-                "unit": new_unit,
+                "current_stock": new_current_stock,
                 "measurement": new_measurement,
-                "name": new_name
+                "name": new_name,
+                "capacity": new_capacity
             }
         )
 

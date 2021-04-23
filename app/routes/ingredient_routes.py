@@ -37,7 +37,7 @@ def handle_get_ingredients(user_id: str, operation: str):
 
 
 def handle_upsert_ingredient(payload: list, user_id: str, operation: str):
-    new_ingredient = IngredientController.upsert_ingredients(
+    IngredientController.upsert_ingredients(
         user_id=user_id,
         payload=payload,
     )

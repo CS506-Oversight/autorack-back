@@ -37,7 +37,7 @@ def handle_get_menu(user_id: str, operation: str):
 
 
 def handle_upsert_menu_item(payload: list, user_id: str, operation: str):
-    new_menu_item = MenuController.upsert_menu_items(
+    MenuController.upsert_menu_items(
         user_id=user_id,
         payload=payload,
     )

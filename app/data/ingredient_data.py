@@ -23,31 +23,42 @@ class IngredientModel(db.Model):
 
     ingredient_id = db.Column(db.String(), primary_key=True)
     measurement = db.Column(db.String(), nullable=False)
-    current_stock = db.Column(db.Integer(), nullable=False)
+    current_stock = db.Column(db.Numeric(10, 2), nullable=False)
+    current_stock_equivalent = db.Column(db.Numeric(10, 2), nullable=False)
     name = db.Column(db.String(), nullable=False)
     user_id = db.Column(db.String(), nullable=False)
-    capacity = db.Column(db.Integer(), nullable=False)
+    capacity = db.Column(db.Numeric(10, 2), nullable=False)
+    capacity_equivalent = db.Column(db.Numeric(10, 2), nullable=False)
+    capacity_measure = db.Column(db.String(), nullable=False)
 
-    def __init__(self, ingredient_id: str, measurement: str, current_stock: int, user_id: str, name: str, capacity: int):
+    def __init__(self, ingredient_id: str, measurement: str, current_stock: float, user_id: str, name: str,
+                 capacity: float, capacity_equivalent: float, capacity_measure: str, current_stock_equivalent: float):
         self.ingredient_id = ingredient_id
         self.measurement = measurement
         self.capacity = capacity
-        self.current_stock = current_stock
         self.user_id = user_id
         self.name = name
+        self.capacity_equivalent = capacity_equivalent
+        self.capacity_measure = capacity_measure
+        self.current_stock_equivalent = current_stock_equivalent
+        self.current_stock = current_stock
 
     def __repr__(self):
         return f"<Ingredient {self.ingredient_id}>"
 
     def to_dict(self):
         measure_deserialized = json.loads(self.measurement)
+        capacity_measure_deserialized = json.loads(self.capacity_measure)
 
         return {
             "name": self.name,
             "id": self.ingredient_id,
             "measure": measure_deserialized,
-            "currentStock": self.current_stock,
-            "capacity": self.capacity
+            "currentStock": float(self.current_stock),
+            "capacity": float(self.capacity),
+            "capacityEquivalent": float(self.capacity_equivalent),
+            "capacityMeasure": capacity_measure_deserialized,
+            "currentStockEquivalent": float(self.current_stock_equivalent),
         }
 
 
@@ -65,6 +76,7 @@ class IngredientController(Controller):
 
         for item in payload:
             measure_serialized = json.dumps(item["measure"])
+            capacity_measure_serialized = json.dumps(item["capacityMeasure"])
             # If ingredient_id already exists, then this is an update
             if "id" in item:
                 ingredient_id = item["id"]
@@ -77,6 +89,9 @@ class IngredientController(Controller):
                     new_measurement=measure_serialized,
                     new_name=item["name"],
                     new_capacity=item["capacity"],
+                    new_capacity_equivalent=item["capacityEquivalent"],
+                    new_capacity_measure=capacity_measure_serialized,
+                    new_current_stock_equivalent=item["currentStockEquivalent"],
                     session=session
                 )
 
@@ -93,7 +108,10 @@ class IngredientController(Controller):
                 current_stock=item["currentStock"],
                 user_id=user_id,
                 name=item["name"],
-                capacity=item["capacity"]
+                capacity=item["capacity"],
+                capacity_equivalent=item["capacityEquivalent"],
+                capacity_measure=capacity_measure_serialized,
+                current_stock_equivalent=item["currentStockEquivalent"],
             )
 
             session.add(ingredient)
@@ -122,7 +140,8 @@ class IngredientController(Controller):
 
     @classmethod
     def __update(cls, ingredient_id: str, user_id: str, new_current_stock: int, new_measurement: str,
-                 new_name: str, new_capacity: int, session: Session) -> None:
+                 new_name: str, new_capacity: int, new_capacity_equivalent: float, new_capacity_measure: str,
+                 new_current_stock_equivalent: float, session: Session) -> None:
         session.query(IngredientModel).filter(
             and_(
                 IngredientModel.user_id == user_id,
@@ -133,7 +152,11 @@ class IngredientController(Controller):
                 "current_stock": new_current_stock,
                 "measurement": new_measurement,
                 "name": new_name,
-                "capacity": new_capacity
+                "capacity": new_capacity,
+                "capacity_equivalent": new_capacity_equivalent,
+                "capacity_measure": new_capacity_measure,
+                "current_stock_equivalent": new_current_stock_equivalent,
+
             }
         )
 

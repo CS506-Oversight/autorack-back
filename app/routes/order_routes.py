@@ -18,7 +18,7 @@ blueprint_order: Blueprint = Blueprint("order", __name__)
 def handle_order():
     user_id = request.args.get("user_id", type=str)
     data = json.loads(request.data)
-    InventoryController.updateInventory(data["payload"], user_id)
+    InventoryController.update_inventory(data["payload"], user_id)
     req_method = request.method
 
     if req_method == "POST":

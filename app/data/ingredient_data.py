@@ -8,6 +8,7 @@ from sqlalchemy import and_
 
 from app.utils import generate_rand_id
 from .base import Controller
+from .supplier_data import SupplierController
 from .config import db
 
 __all__ = ("IngredientModel", "IngredientController")
@@ -101,6 +102,8 @@ class IngredientController(Controller):
             rand_ingredient_id = generate_rand_id("i_")
             while cls.__item_exists(user_id=user_id, ingredient_id=rand_ingredient_id):
                 rand_ingredient_id = generate_rand_id("i_")
+
+            SupplierController.add_ingredient(ingredient_id=rand_ingredient_id, measure=item["measure"])
 
             ingredient = IngredientModel(
                 ingredient_id=rand_ingredient_id,

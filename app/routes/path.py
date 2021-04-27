@@ -2,5 +2,15 @@
 
 # Main routes
 EP_ROOT = "/"
-EP_ADD = "/add"
-EP_DATA = "/data"
+
+# User Routes
+EP_USER = "/user"
+
+# Menu Routes
+EP_MENU_ITEM = "/menu-item"
+
+# Ingredient Routes
+EP_INGREDIENT = "/ingredient"
+
+# Restock Purchases Routes
+EP_RESTOCK = "/restock"

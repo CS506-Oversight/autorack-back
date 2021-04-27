@@ -1,14 +1,14 @@
 """Erroneous response classes."""
 from dataclasses import dataclass
 
-from .mixin import MessagedResponseMixin, StatusedResponseMixin
+from ..mixin import MessagedResponseMixin, StatusedResponseMixin
 
-__all__ = ("MealControlFailedResponse",)
+__all__ = ("UserControlFailedResponse",)
 
 
 @dataclass
-class MealControlFailedResponse(MessagedResponseMixin, StatusedResponseMixin):
-    """Response class for the failing response of meal control."""
+class UserControlFailedResponse(MessagedResponseMixin, StatusedResponseMixin):
+    """Response class for the failing response of user control."""
 
     message: str
 

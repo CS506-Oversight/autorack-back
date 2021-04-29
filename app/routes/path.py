@@ -17,3 +17,6 @@ EP_RESTOCK = "/restock"
 
 # Order Routes
 EP_ORDER = "/order"
+
+# Inventory Routes for Dashboard
+EP_INVENTORY = "/inventory"

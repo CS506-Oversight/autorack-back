@@ -63,7 +63,7 @@ class RestockPurchaseController(Controller):
     model = RestockPurchaseModel
 
     @classmethod
-    def add_restock_purchase(cls, status: str, total_price: int, purchase_date: str,
+    def add_restock_purchase(cls, status: str, total_price: float, purchase_date: str,
                              purchase_type: str, items_purchased: list, user_id: str) -> bool:
         """
         Add a restock purchase and return when the purchase is added.
@@ -80,7 +80,7 @@ class RestockPurchaseController(Controller):
         purchase = RestockPurchaseModel(
             purchase_id=random_purchase_id,
             status=status,
-            total_price=total_price * 100,
+            total_price=int(total_price * 100),
             purchase_date=purchase_date,
             purchase_type=purchase_type,
             items_purchased=items_purchased_serialized,

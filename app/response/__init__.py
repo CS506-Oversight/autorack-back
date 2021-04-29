@@ -7,3 +7,4 @@ from .menu import MenuResponse, UpsertMenuItemResponse
 from .order import OrderResponse, UpsertOrderResponse
 from .restock_purchases import RestockPurchaseResponse
 from .ingredient import IngredientResponse, UpsertIngredientItemResponse
+from .inventory import InventoryResponse

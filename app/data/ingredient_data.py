@@ -159,7 +159,6 @@ class IngredientController(Controller):
                 "capacity_equivalent": new_capacity_equivalent,
                 "capacity_measure": new_capacity_measure,
                 "current_stock_equivalent": new_current_stock_equivalent,
-
             }
         )
 

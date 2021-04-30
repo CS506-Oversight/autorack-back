@@ -6,7 +6,7 @@ from app.data import RestockPurchaseController, RestockPurchaseModel
 
 
 def test_restock_get_empty_restock_purchases(client):
-    user_id = "kjhgvjklerlsjoife"
+    user_id = "BQ93RVR6vrRS5baWd4LZra6rj103"
 
     response = client.get(EP_RESTOCK + f"?user_id={user_id}")
 
@@ -17,7 +17,7 @@ def test_restock_get_empty_restock_purchases(client):
 
 
 def test_restock_add_three_restock_purchases():
-    user_id = "kjhgvjklerlsjoife"
+    user_id = "BQ93RVR6vrRS5baWd4LZra6rj103"
     purchases = [
         {
             "status": "completed",
@@ -93,12 +93,12 @@ def test_restock_add_three_restock_purchases():
     for purchase in purchases:
         assert RestockPurchaseController.add_restock_purchase(
             status=purchase["status"], total_price=purchase["total_price"], purchase_date=purchase["purchase_date"],
-            purchase_type=["purchase_type"], items_purchased=purchase["items_purchased"], user_id=user_id
+            purchase_type=purchase["purchase_type"], items_purchased=purchase["items_purchased"], user_id=user_id
         )
 
 
 def test_restock_add_one_check_price(client):
-    user_id = "kjhgvjklerlsjoife"
+    user_id = "BQ93RVR6vrRS5baWd4LZra6rj103"
     purchase = {
         "status": "completed",
         "total_price": 12.11,
@@ -125,7 +125,7 @@ def test_restock_add_one_check_price(client):
 
     assert RestockPurchaseController.add_restock_purchase(
         status=purchase["status"], total_price=purchase["total_price"], purchase_date=purchase["purchase_date"],
-        purchase_type=["purchase_type"], items_purchased=purchase["items_purchased"], user_id=user_id
+        purchase_type=purchase["purchase_type"], items_purchased=purchase["items_purchased"], user_id=user_id
     )
 
     query_data = RestockPurchaseController.get_query().filter_by(user_id=user_id).all()
@@ -146,7 +146,7 @@ def test_restock_add_one_check_price(client):
 
 
 def test_restock_add_two_check_items_purchased(client):
-    user_id = "kjhgvjklerlsjoife"
+    user_id = "BQ93RVR6vrRS5baWd4LZra6rj103"
     purchases = [
         {
             "status": "completed",
@@ -214,7 +214,7 @@ def test_restock_add_two_check_items_purchased(client):
     for purchase in purchases:
         assert RestockPurchaseController.add_restock_purchase(
             status=purchase["status"], total_price=purchase["total_price"], purchase_date=purchase["purchase_date"],
-            purchase_type=["purchase_type"], items_purchased=purchase["items_purchased"], user_id=user_id
+            purchase_type=purchase["purchase_type"], items_purchased=purchase["items_purchased"], user_id=user_id
         )
 
     response = client.get(EP_RESTOCK + f"?user_id={user_id}")

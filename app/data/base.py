@@ -6,21 +6,14 @@ from sqlalchemy.orm import Query, Session
 
 from .config import db
 
-__all__ = ("Controller",)
+__all__ = ("UtilController", "Controller")
 
 
 T = TypeVar("T", bound=db.Model)
 
 
-class Controller(ABC):
-    """
-    Base class of a data controller.
-
-    Class variable `model`, or the class method `get_model()`
-    should be overridden for getting the actual model of this controller.
-    """
-
-    model: Type[T] = None
+class UtilController(ABC):
+    """Base class of a data controller that serves as an utility controller only."""
 
     @classmethod
     def get_session(cls) -> Session:
@@ -31,6 +24,17 @@ class Controller(ABC):
         # to potentially generate sessions without changing too much in code.
         return db.session
 
+
+class Controller(UtilController, ABC):
+    """
+    Base class of a data controller.
+
+    Class variable `model`, or the class method `get_model()`
+    should be overridden for getting the actual model of this controller.
+    """
+
+    model: Type[T] = None
+
     @classmethod
     def get_model(cls) -> Type[T]:
         """Get the model class of this data controller."""
@@ -38,6 +42,9 @@ class Controller(ABC):
         # Having this method allows us to either override this method to get the model,
         # or statically get the model class to perform query.
         # This also allows us to access the auto-complete of `model.query` by type-hinting (using `get_query()`).
+        if cls.model is None:
+            raise ValueError(f"Model of the controller `{cls.__name__}` doesn't have `model` assigned")
+
         return cls.model
 
     @classmethod

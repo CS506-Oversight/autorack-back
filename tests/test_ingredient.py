@@ -5,7 +5,7 @@ from app.routes.operations import *
 
 
 def test_ingredient_add_item(client):
-    user_id = "jRD9JUG1fzMP3FoMopfIivfgBh42"
+    user_id = "BQ93RVR6vrRS5baWd4LZra6rj103"
     payload = {
         "payload": [
             {
@@ -38,7 +38,7 @@ def test_ingredient_add_item(client):
 
 
 def test_ingredient_add_two_items(client):
-    user_id = "jRD9JUG1fzMP3FoMopfIivfgBh42"
+    user_id = "BQ93RVR6vrRS5baWd4LZra6rj103"
     payload = {
         "payload": [
             {
@@ -89,7 +89,7 @@ def test_ingredient_add_two_items(client):
 
 
 def test_ingredient_get_multiple_ingredients(client):
-    user_id = "jRD9JUG1fzMP3FoMopfIivfgBh42"
+    user_id = "BQ93RVR6vrRS5baWd4LZra6rj103"
     payload = {
         "payload": [
             {
@@ -142,7 +142,7 @@ def test_ingredient_get_multiple_ingredients(client):
 
 
 def test_ingredients_get_empty_ingredients(client):
-    user_id = "jRD9JUG1fzMP3FoMopfIivfgBh42"
+    user_id = "BQ93RVR6vrRS5baWd4LZra6rj103"
 
     response = client.get(EP_INGREDIENT + f'?user_id={user_id}')
 

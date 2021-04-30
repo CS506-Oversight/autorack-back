@@ -5,7 +5,7 @@ from app.routes.operations import *
 
 
 def test_menu_add_item(client):
-    user_id = "kjhgvjklerlsjoife"
+    user_id = "BQ93RVR6vrRS5baWd4LZra6rj103"
     payload = {
         "payload": [
             {
@@ -30,7 +30,7 @@ def test_menu_add_item(client):
 
 
 def test_menu_add_two_items(client):
-    user_id = "kjhgvjklerlsjoife"
+    user_id = "BQ93RVR6vrRS5baWd4LZra6rj103"
     payload = {
         "payload": [
             {
@@ -65,7 +65,7 @@ def test_menu_add_two_items(client):
 
 
 def test_menu_get_menu_multiple_items(client):
-    user_id = "jkdsnkfkwdfhkjoc"
+    user_id = "BQ93RVR6vrRS5baWd4LZra6rj103"
     post_payload = {
         "payload": [
             {
@@ -112,7 +112,7 @@ def test_menu_get_menu_multiple_items(client):
 
 
 def test_menu_get_empty_menu(client):
-    user_id = "jkdsnkfkwdfhkjoc"
+    user_id = "BQ93RVR6vrRS5baWd4LZra6rj103"
 
     response = client.get(EP_MENU_ITEM + f'?user_id={user_id}')
 

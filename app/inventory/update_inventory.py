@@ -1,15 +1,17 @@
 import datetime
 from decimal import Decimal
 
+from sqlalchemy.orm import Session
 from sqlalchemy import and_
 
+from app.data.base import Controller
 from app.data import MenuController, IngredientController, IngredientModel, RestockPurchaseController, \
-    SupplierController, IngredientInProgressController, IngredientsInProgressModel
+    SupplierController, IngredientInProgressController, IngredientsInProgressModel, RestockPurchaseModel
 
 __all__ = "InventoryController"
 
 
-class InventoryController:
+class InventoryController(Controller):
     @classmethod
     def get_menu_items(cls, user_id):
         return MenuController.get_menu(user_id=user_id)
@@ -94,37 +96,13 @@ class InventoryController:
         ingredients = IngredientController.get_ingredients(user_id=user_id)
 
         items_purchased = []
-        updated_ingredients = []
+
         total_price = 0.0
 
         for ingredient in ingredients:
             if (ingredient["currentStockEquivalent"] <= ingredient["capacityEquivalent"] * threshold) \
                     and not cls.is_processing(user_id=user_id, ingredient_id=ingredient["id"]):
                 print("RESTOCKING!!")
-                # curr_stock = 0.0
-                # curr_stock_equivalent = 0.0
-                #
-                # # Case in which stock and capacity units of ingredient are not the same
-                # if ingredient["measure"]["name"] != ingredient["capacityMeasure"]["name"]:
-                #     # Reset stock in the units used used by current stock
-                #     curr_stock = float(ingredient["capacityEquivalent"]) / float(ingredient["measure"]["equivalentMetric"])
-                #     # Reset stock equivalent in terms of the unit used for current stock
-                #     curr_stock_equivalent = curr_stock * float(ingredient["measure"]["equivalentMetric"])
-                # # Case in which stock and capacity units of ingredient are the same
-                # else:
-                #     curr_stock = ingredient["capacity"]
-                #     curr_stock_equivalent = ingredient["capacityEquivalent"]
-                #
-                # updated_ingredients.append({
-                #     "id": ingredient["id"],
-                #     "currentStock": curr_stock,
-                #     "measure": ingredient["measure"],
-                #     "name": ingredient["name"],
-                #     "capacity": ingredient["capacity"],
-                #     "capacityEquivalent": ingredient["capacityEquivalent"],
-                #     "capacityMeasure": ingredient["capacityMeasure"],
-                #     "currentStockEquivalent": curr_stock_equivalent
-                # })
 
                 # Gets the randomized price from the supplier db
                 ingredient_price = SupplierController.get_ingredient_price(ingredient["id"])
@@ -157,7 +135,6 @@ class InventoryController:
             else:
                 print('NOT RESTOCKING')
 
-        # IngredientController.upsert_ingredients(user_id=user_id, payload=updated_ingredients)
         current_day = datetime.date.today()
         formatted_date = datetime.date.strftime(current_day, "%m/%d/%Y")
 
@@ -168,3 +145,60 @@ class InventoryController:
                                                            purchase_date=formatted_date, purchase_type="Auto",
                                                            items_purchased=items_purchased, user_id=user_id
                                                            )
+
+    @classmethod
+    def fulfill_inventory(cls, user_id):
+        processing_purchases = RestockPurchaseModel.query.filter(
+            and_(
+                RestockPurchaseModel.user_id == user_id,
+                RestockPurchaseModel.status == "processing"
+            )
+        ).all()
+
+        session: Session = cls.get_session()
+
+        for purchase in processing_purchases:
+            session.query(RestockPurchaseModel).filter(
+                and_(
+                    RestockPurchaseModel.user_id == user_id,
+                    RestockPurchaseModel.purchase_id == purchase.purchase_id
+                )
+            ).update({"status": "completed"})
+
+            session.commit()
+
+        ingredients_in_progress = IngredientsInProgressModel.query.filter_by(user_id=user_id).all()
+
+        updated_ingredients = []
+
+        for ingredient in ingredients_in_progress:
+            ingredient_info = IngredientModel.query.filter(
+                and_(
+                    IngredientModel.user_id == user_id,
+                    IngredientModel.ingredient_id == ingredient.ingredient_id
+                )
+            ).first()
+
+            ingredient_info_dict = ingredient_info.to_dict()
+
+            in_progress_equivalent = float(ingredient.amount_in_progress) * float(
+                ingredient_info_dict["measure"]["equivalentMetric"]
+            )
+
+            new_stock = float(ingredient.amount_in_progress) + float(ingredient_info_dict["currentStock"])
+            new_equivalent = in_progress_equivalent + float(ingredient_info_dict["currentStockEquivalent"])
+
+            updated_ingredients.append({
+                "id": ingredient_info_dict["id"],
+                "currentStock": new_stock,
+                "measure": ingredient_info_dict["measure"],
+                "name": ingredient_info_dict["name"],
+                "capacity": ingredient_info_dict["capacity"],
+                "capacityEquivalent": ingredient_info_dict["capacityEquivalent"],
+                "capacityMeasure": ingredient_info_dict["capacityMeasure"],
+                "currentStockEquivalent": new_equivalent
+            })
+
+            IngredientInProgressController.delete_ingredients_in_progress(user_id=user_id, ingredient_id=ingredient_info_dict["id"])
+
+        IngredientController.upsert_ingredients(user_id=user_id, payload=updated_ingredients)

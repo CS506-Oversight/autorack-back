@@ -44,6 +44,7 @@ class OrderModel(db.Model):
             "order": order,
         }
 
+
 class OrderController(Controller):
     """Controller for orders."""
 
